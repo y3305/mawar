@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; }
+        #chatbox { border: 1px solid #ccc; height: 400px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        #userInput { width: 70%; padding: 10px; }
+        button { padding: 10px; width: 25%; }
+        .user-msg { color: blue; margin: 5px 0; }
+        .bot-msg { color: green; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Chatbot AI (OpenAI)</h1>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Tulis pesanmu..." />
+    <button onclick="sendMessage()">Kirim</button>
+
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById("userInput");
+            const chatbox = document.getElementById("chatbox");
+            
+            // Tampilkan pesan user
+            chatbox.innerHTML += `<div class="user-msg"><strong>Anda:</strong> ${userInput.value}</div>`;
+            
+            // Kirim ke backend Flask
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput.value })
+            });
+            
+            const data = await response.json();
+            
+            // Tampilkan balasan AI (dengan Markdown support)
+            chatbox.innerHTML += `<div class="bot-msg"><strong>AI:</strong> ${marked.parse(data.reply)}</div>`;
+            
+            userInput.value = "";  // Kosongkan input
+            chatbox.scrollTop = chatbox.scrollHeight;  // Auto-scroll ke bawah
+        }
+
+        // Enter untuk kirim pesan
+        document.getElementById("userInput").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+    </script>
+</body>
+</html>
